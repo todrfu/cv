@@ -1,0 +1,24 @@
+{
+  "name": "@todrfu/workbench",
+  "version": "0.0.1",
+  "description": "todrfu workbench",
+  "private": true,
+  "scripts": {
+    "cli:dev": "pnpm -C packages/cli dev",
+    "cli:build": "pnpm -C packages/cli build",
+    "change": "changeset",
+    "change:version": "changeset version",
+    "change:publish": "changeset publish"
+  },
+  "keywords": [
+    "cli"
+  ],
+  "author": "todrfu",
+  "license": "ISC",
+  "devDependencies": {
+    "@changesets/cli": "^2.26.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

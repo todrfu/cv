@@ -1,0 +1,14 @@
+{
+  "name": "@otdrfu/generator-exapmle",
+  "version": "0.0.1",
+  "description": "yeoman generator example",
+  "main": "index.js",
+  "author": "todrfu",
+  "repository": "https://xxxx",
+  "license": "MIT",
+  "keywords": [],
+  "dependencies": {
+    "rimraf": "^4.4.1",
+    "yeoman-generator": "^4.0.1"
+  }
+}
