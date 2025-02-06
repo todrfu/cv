@@ -1,8 +1,12 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import dowload from 'download-git-repo'
 import { execSync } from 'node:child_process'
 
+/**
+ * copy file
+ * @param src
+ * @param dest
+ */
 export function copy(src: string, dest: string) {
   const stat = fs.statSync(src)
   if (stat.isDirectory()) {
@@ -12,10 +16,18 @@ export function copy(src: string, dest: string) {
   }
 }
 
+/**
+ * validate package name
+ * @param projectName
+ */
 export function isValidPackageName(projectName: string) {
   return /^(?:@[a-z\d\-*~][a-z\d\-*._~]*\/)?[a-z\d\-~][a-z\d\-._~]*$/.test(projectName)
 }
 
+/**
+ * convert project name to valid package name
+ * @param projectName
+ */
 export function toValidPackageName(projectName: string) {
   return projectName
     .trim()
@@ -25,6 +37,11 @@ export function toValidPackageName(projectName: string) {
     .replace(/[^a-z\d\-~]+/g, '-')
 }
 
+/**
+ * copy directory
+ * @param srcDir
+ * @param destDir
+ */
 export function copyDir(srcDir: string, destDir: string) {
   fs.mkdirSync(destDir, { recursive: true })
   for (const file of fs.readdirSync(srcDir)) {
@@ -34,11 +51,19 @@ export function copyDir(srcDir: string, destDir: string) {
   }
 }
 
+/**
+ * check if directory is empty
+ * @param path
+ */
 export function isEmpty(path: string) {
   const files = fs.readdirSync(path)
   return files.length === 0 || (files.length === 1 && files[0] === '.git')
 }
 
+/**
+ * empty directory
+ * @param dir
+ */
 export function emptyDir(dir: string) {
   if (!fs.existsSync(dir)) {
     return
@@ -80,10 +105,6 @@ export function getGitRepoName(url: string) {
  * @param filePath
  */
 export function readJson(filePath: string) {
-  // try {
-  // } catch (err) {
-  //   console.log(chalk.red(`can't parse file "${filePath}": ${err}`))
-  // }
   const data = fs.readFileSync(filePath, 'utf8')
   return JSON.parse(data)
 }
@@ -96,41 +117,12 @@ export function readJson(filePath: string) {
 export function updateJson(filePath: string, updateJSON: (json: Record<string, any>) => Record<string, any>) {
   const jsonData = readJson(filePath)
   if (!jsonData) return
-  // try {
-  // } catch (writeErr) {
-  //   console.log(chalk.red(`can't write file "${filePath}": ${writeErr}`))
-  // }
   fs.writeFileSync(filePath, JSON.stringify(updateJSON(jsonData), null, 2), 'utf8')
 }
 
 /**
- * download git zip
- * @param gitUrl zip url，eg: https://xxx/-/archive/master/xxxx.zip
- * @param destPath project dest path
- */
-export function downloadGitProject(gitUrl: string, destPath: string) {
-  return new Promise((resolve, reject) => {
-    dowload(
-      `direct:${gitUrl}`,
-      destPath,
-      {
-        clone: false,
-        headers: {},
-      },
-      (err) => {
-        if (err) {
-          return reject(err)
-        }
-        resolve({ status: 'success' })
-      }
-    )
-  })
-}
-
-/**
- * 查询与关键字pkgName相关的npm包
- * @param pkgName string
- * @returns npm包信息数组
+ * get remote templates
+ * @param pkgName
  */
 export function getRemoteTemplates(pkgName: string): Array<{ name: string; description: string }> {
   let packages = []
@@ -138,7 +130,7 @@ export function getRemoteTemplates(pkgName: string): Array<{ name: string; descr
     const commandOutput = execSync(`npm search ${pkgName} --json`).toString()
     packages = JSON.parse(commandOutput)
   } catch (err) {
-    console.log('查询模板列表失败')
+    console.log('get remote templates failed')
   }
   return packages
 }

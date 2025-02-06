@@ -6,6 +6,8 @@
     "paths": {
       "@": ["src/*"],
     },
-    "types": ["./global.d.ts"]
+    "types": [
+      "jest"
+    ]
   }
 }

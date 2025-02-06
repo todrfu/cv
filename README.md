@@ -1,5 +1,7 @@
 # @cv-cli
 
++ [![Release](https://github.com/todrfu/cv-cli/actions/workflows/release.yml/badge.svg)](https://github.com/todrfu/cv-cli/actions/workflows/release.yml)
+
 The global command for `cli` is: `cv`
 
 | CMD     | Description          | Note      |
