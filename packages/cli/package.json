@@ -1,6 +1,6 @@
 {
   "name": "@otdrfu/cv",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "private": false,
   "description": "cv engineers",
   "main": "dist/index.js",
@@ -17,7 +17,7 @@
   "files": [
     "dist",
     "bin",
-    "generator-template",
+    "generators",
     "README.md"
   ],
   "keywords": [

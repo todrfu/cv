@@ -7,6 +7,7 @@ import minimist from 'minimist'
 import { mkdirp } from 'mkdirp'
 import Install from './scripts/install'
 
+import pkg from '../package.json'
 import {
   DEFAULT_TEMPLATES,
   CLI_NAME,
@@ -14,9 +15,9 @@ import {
   HOMEDIR,
   TEMPLATE_DIR,
   NPM_REGISTRY,
-  CACHE_TEMPLATE_PACKAGE_NAME
+  CACHE_TEMPLATE_PACKAGE_NAME,
+  INIT_FLAG_FILE,
 } from 'src/const'
-import pkg from '../package.json'
 
 const { cyan, yellow, green } = chalk
 
@@ -64,7 +65,14 @@ class CLI {
     this.execCmd()
   }
   async initWhenFirstRun() {
-    await this.prepareTemplateDir(this.dir)
+    // check is initialized
+    const initFlagFile = path.resolve(this.dir.home, INIT_FLAG_FILE)
+    if (!fs.existsSync(initFlagFile)) {
+      await this.prepareTemplateDir(this.dir)
+      await this.copyGenerators()
+      fs.writeFileSync(initFlagFile, new Date().toISOString())
+    }
+
     await this.installDefaultTpls()
   }
   /**
@@ -120,9 +128,7 @@ class CLI {
    * @param dir directory info
    */
   async prepareTemplateDir(dir: DirectoryInfo) {
-    // template package
     const pkg = path.resolve(dir.tpl, 'package.json')
-    if (fs.existsSync(pkg)) return
 
     await mkdirp(dir.tpl)
 
@@ -149,6 +155,49 @@ class CLI {
       // if the template is installed, skip
       if (fs.existsSync(path.resolve(this.dir.tpl, `generator-${tpl.name}`))) continue
       await installIns.installGenerator(tpl.url)
+    }
+  }
+  /**
+   * copy generators dir to user config dir
+   */
+  async copyGenerators() {
+    const cacheTemplateDir = this.dir.tpl
+    if (!fs.existsSync(cacheTemplateDir)) return
+
+    const generatorsSourceDir = path.resolve(__dirname, '../generators')
+
+    // filter folder
+    const items = fs.readdirSync(generatorsSourceDir).filter((item) => fs.statSync(path.join(__dirname, '../generators', item)).isDirectory())
+    for (const item of items) {
+      if (item === 'generator-template') continue
+
+      const srcPath = path.join(generatorsSourceDir, item)
+      const destPath = path.join(cacheTemplateDir, item)
+
+      if (!fs.statSync(srcPath).isDirectory()) continue
+
+      if (fs.existsSync(destPath)) continue
+
+      await this.copyDir(srcPath, destPath)
+    }
+  }
+  /**
+   * recursive copy dir
+   */
+  async copyDir(src: string, dest: string) {
+    await mkdirp(dest)
+
+    const entries = fs.readdirSync(src, { withFileTypes: true })
+
+    for (const entry of entries) {
+      const srcPath = path.join(src, entry.name)
+      const destPath = path.join(dest, entry.name)
+
+      if (entry.isDirectory()) {
+        await this.copyDir(srcPath, destPath)
+      } else {
+        fs.copyFileSync(srcPath, destPath)
+      }
     }
   }
 }

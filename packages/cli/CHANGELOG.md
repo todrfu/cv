@@ -1,5 +1,11 @@
 # @otdrfu/cv
 
+## 0.1.0
+
+### Minor Changes
+
+- [A] add Chrome extension generator
+
 ## 0.0.2
 
 ### Patch Changes

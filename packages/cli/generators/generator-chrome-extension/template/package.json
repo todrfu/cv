@@ -1,0 +1,12 @@
+{
+  "name": "<%= appName %>",
+  "version": "0.0.1",
+  "description": "<%= description %>",
+  "author": "<%= author %>",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "devDependencies": {
+    "crx": "^5.0.1"
+  }
+}

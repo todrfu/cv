@@ -3,8 +3,8 @@ import path from 'node:path'
 import { execSync } from 'node:child_process'
 import chalk from 'chalk'
 import inquirer from 'inquirer'
-import { createEnv } from 'yeoman-environment'
 import importFrom from 'import-from'
+import { createEnv } from 'yeoman-environment'
 
 import ScriptBase from 'src/baseScript'
 import { NPM_REGISTRY, TEMPLATE_DIR } from 'src/const'
@@ -15,7 +15,7 @@ const { green, yellow, red } = chalk
 
 import Install from './install'
 
-const LOG_MODULE = '[install template]'
+const LOG_MODULE = '[create project]'
 
 const yoemanEnv = createEnv()
 
@@ -80,7 +80,7 @@ export default class Create implements ScriptBase {
 
       execSync(`npm i --registry=${NPM_REGISTRY}`, {
         cwd: path.join(generatorsPath, `./${tplName}`),
-        // stdio: 'ignore'
+        stdio: 'inherit'
       })
 
       console.log(green(`${LOG_MODULE} Dependencies installed successfully.`))
@@ -103,7 +103,8 @@ export default class Create implements ScriptBase {
    * local default templates
    */
   genLocalGenerators(generatorsPath: string) {
-    const generators: string[] = fs.readdirSync(generatorsPath).filter((item) => item.startsWith('generator-'))
+    // filter folder
+    const generators: string[] = fs.readdirSync(generatorsPath).filter((item) => fs.statSync(path.join(generatorsPath, `./${item}`)).isDirectory())
     return generators.reduce((acc: Array<{ name: string; value: string }>, cur) => {
       const json = readJson(path.join(generatorsPath, `./${cur}/package.json`))
       acc.push({

@@ -2,7 +2,7 @@ import path from 'node:path'
 import fs from 'node:fs'
 import ora from 'ora'
 import chalk from 'chalk'
-import { TEMPLATE_PREFIX, CLI_NAME } from 'src/const'
+import { CLI_NAME } from 'src/const'
 import ScriptBase from 'src/baseScript'
 
 const { green, red } = chalk
@@ -15,10 +15,10 @@ export default class Yo implements ScriptBase {
     this.dir = dir
     const name = process.argv[3]
     if (!name) {
-      console.log(red(`Please specify the template name，eg: ${CLI_NAME} yo ${TEMPLATE_PREFIX}-xxx `))
+      console.log(red(`Please specify the template name，eg: ${CLI_NAME} yo xxx `))
       process.exit(1)
     }
-    this.pkgName = name.startsWith(TEMPLATE_PREFIX) ? name : `${TEMPLATE_PREFIX}-${name}`
+    this.pkgName = name
   }
   start() {
     this.installTemplate()
@@ -36,7 +36,7 @@ export default class Yo implements ScriptBase {
     try {
 
       // copy generator-template
-      const generatorTemplatePath = path.join(__dirname, '../../generator-template')
+      const generatorTemplatePath = path.join(__dirname, '../../generators/generator-template')
 
       // rename
       fs.cpSync(generatorTemplatePath, projectPath, { recursive: true })

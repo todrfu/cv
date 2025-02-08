@@ -2,6 +2,11 @@ import path from 'node:path'
 import { home } from 'osenv'
 
 /**
+ * user home dir
+ */
+export const HOMEDIR = home()
+
+/**
  * scripts folder name
  */
 export const COMMANDS_FOLDER = 'scripts'
@@ -20,6 +25,11 @@ export const NPM_REGISTRY = 'https://registry.npmmirror.com/'
  * cli config file name, eg: .cv.js
  */
 export const CONFIG_FILE_NAME = `.${CLI_NAME}.js`
+
+/**
+ * init flag file
+ */
+export const INIT_FLAG_FILE = `.${CLI_NAME}/.initialized`
 
 /**
  * templates dir name of user client
@@ -45,11 +55,6 @@ export const TEAMPLATE_EXAMPLE_URL = 'https://git.xxx.com/xxx.git'
  * default templates
  */
 export const DEFAULT_TEMPLATES: Template[] = []
-
-/**
- * user home dir
- */
-export const HOMEDIR = home()
 
 /**
  * template dir of user client
