@@ -65,7 +65,7 @@ export default class Install implements ScriptBase {
    * @param url git url
    */
   installByGit(url: string) {
-    const branch = url.split('#').pop()
+    const branch = url.includes('#') ? url.split('#').pop() : undefined
     execSync(`git clone ${url} ${branch ? `--branch ${branch}` : ''}`, {
       cwd: this.dir.tpl,
       stdio: 'inherit',
