@@ -44,14 +44,7 @@ export const TEAMPLATE_EXAMPLE_URL = 'https://git.xxx.com/xxx.git'
 /**
  * default templates
  */
-export const DEFAULT_TEMPLATES: Template[] = [
-  {
-    url: 'https://github.com/todrfu/open-vue-devtools.git',
-    name: 'open-vue-devtools',
-    description: 'open-vue-devtools',
-    version: '0.0.1',
-  },
-]
+export const DEFAULT_TEMPLATES: Template[] = []
 
 /**
  * user home dir

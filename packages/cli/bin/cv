@@ -1,2 +1,8 @@
 #!/usr/bin/env node
+
+// 禁用 punycode 废弃警告
+process.on('warning', (warning) => {
+  if (warning.name === 'DeprecationWarning' && warning.code === 'DEP0040') return;
+});
+
 require('../dist/index')
