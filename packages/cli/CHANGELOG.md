@@ -1,5 +1,11 @@
 # @otdrfu/cv
 
+## 0.1.2
+
+### Patch Changes
+
+- [F] correct generator template path in install script
+
 ## 0.1.1
 
 ### Patch Changes

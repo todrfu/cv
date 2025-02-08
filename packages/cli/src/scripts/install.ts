@@ -97,7 +97,7 @@ export default class Install implements ScriptBase {
       console.log(yellow(`${LOG_MODULE} ${templateName} is not a yoeman generator.`))
 
       // copy generator-template
-      const generatorTemplatePath = path.join(__dirname, '../generators/generator-template')
+      const generatorTemplatePath = path.join(__dirname, '../../generators/generator-template')
 
       // rename
       const newGeneratorPath = path.join(this.dir.tpl, `generator-${templateName}`)
