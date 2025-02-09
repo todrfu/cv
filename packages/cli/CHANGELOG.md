@@ -1,5 +1,11 @@
 # @otdrfu/cv
 
+## 0.1.3
+
+### Patch Changes
+
+- [F] Installation failed when specifying the branch
+
 ## 0.1.2
 
 ### Patch Changes

@@ -5,7 +5,9 @@ import chalk from 'chalk'
 import { CLI_NAME } from 'src/const'
 import ScriptBase from 'src/baseScript'
 
-const { green, red } = chalk
+const { green, red, cyan } = chalk
+
+const LOG_MODULE = green('[yeoman]')
 
 export default class Yo implements ScriptBase {
   pkgName: string
@@ -15,7 +17,7 @@ export default class Yo implements ScriptBase {
     this.dir = dir
     const name = process.argv[3]
     if (!name) {
-      console.log(red(`Please specify the template name，eg: ${CLI_NAME} yo xxx `))
+      console.log(red(`${LOG_MODULE} Please specify the template name，eg: ${CLI_NAME} yo xxx `))
       process.exit(1)
     }
     this.pkgName = name
@@ -27,7 +29,7 @@ export default class Yo implements ScriptBase {
    * Install yeoman template
    */
   async installTemplate() {
-    const loadSpinner = ora('Initializing the Yeoman template').start()
+    const loadSpinner = ora(`${LOG_MODULE} Initializing the Yeoman template`).start()
 
     // Download directory, "/" will be divided into folders
     const projectPath = path.join(process.cwd(), this.pkgName.replace('/', '-'))
@@ -43,10 +45,10 @@ export default class Yo implements ScriptBase {
 
       loadSpinner.succeed()
 
-      console.log(green('Yeoman template has been initialized successfully'))
+      console.log(cyan(`${LOG_MODULE} Yeoman template has been initialized successfully`))
     } catch (err) {
       loadSpinner.fail()
-      console.log(red(`Initialization failed. ${err}`))
+      console.log(red(`${LOG_MODULE} Initialization failed. ${err}`))
     }
   }
 }

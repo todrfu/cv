@@ -9,14 +9,14 @@ import { isUrl, getGitRepoName, readJson, updateJson } from 'src/shared/index'
 
 const { green, yellow, cyan, red } = chalk
 
-const LOG_MODULE = '[install template]'
+const LOG_MODULE = green('[install template]')
 
 const installTipMessage = `
 Please specify the git url or package name of npm to install.
 
 eg:
 
-${cyan(`${CLI_NAME} install ${TEAMPLATE_EXAMPLE_URL}\n${CLI_NAME} install ${TEMPLATE_PREFIX}-xxx`)}
+${green(`${CLI_NAME} install ${TEAMPLATE_EXAMPLE_URL}\n${CLI_NAME} install ${TEMPLATE_PREFIX}-xxx`)}
 `
 
 export default class Install implements ScriptBase {
@@ -35,7 +35,7 @@ export default class Install implements ScriptBase {
 
     // const status = getInstalledStatus(this.pkgName, this.dir.tpl)
     // if (status === 2) {
-    //   console.log(green('The template has been installed'))
+    //   console.log(cyan('The template has been installed'))
     //   return
     // }
 
@@ -48,13 +48,12 @@ export default class Install implements ScriptBase {
   async installGenerator(target: string) {
     if (isUrl(target)) {
       const templateName = getGitRepoName(target)
-      console.log(green(`${LOG_MODULE} start install ${templateName}`))
       const exist = fs.existsSync(path.join(this.dir.tpl, `generator-${templateName}`))
       if (exist) {
-        console.log(green(`${LOG_MODULE} ${templateName} has been installed.`))
+        console.log(yellow(`${LOG_MODULE} ${templateName} already exists.`))
         return
       }
-      this.installByGit(target)
+      this.installByGit(target, templateName)
       this.checkIsYoemanGenerator(templateName)
     } else {
       this.installByNpm(target)
@@ -64,9 +63,14 @@ export default class Install implements ScriptBase {
    * install generator by git clone
    * @param url git url
    */
-  installByGit(url: string) {
-    const branch = url.includes('#') ? url.split('#').pop() : undefined
-    execSync(`git clone ${url} ${branch ? `--branch ${branch}` : ''}`, {
+  installByGit(url: string, templateName: string) {
+    console.log(green(`${LOG_MODULE} Start to clone ${templateName}`))
+    if (!url) {
+      console.log(red(`${LOG_MODULE} Url is required`))
+      process.exit(1)
+    }
+    const [repository, branch] = url.split('#')
+    execSync(`git clone ${repository} ${branch ? `--branch ${branch}` : ''}`, {
       cwd: this.dir.tpl,
       stdio: 'inherit',
     })
@@ -94,8 +98,6 @@ export default class Install implements ScriptBase {
 
     const exist = fs.existsSync(projectPath)
     if (exist) {
-      console.log(yellow(`${LOG_MODULE} ${templateName} is not a yoeman generator.`))
-
       // copy generator-template
       const generatorTemplatePath = path.join(__dirname, '../../generators/generator-template')
 
@@ -112,8 +114,11 @@ export default class Install implements ScriptBase {
       // update generator package.json
       updateJson(path.join(newGeneratorPath, 'package.json'), (json) => {
         json.name = `${TEMPLATE_PREFIX}-${templateName}`
+        json.description = templateName
         return json
       })
+
+      console.log(yellow(`${LOG_MODULE} Start to install dependencies`))
 
       // install yeoman-generator dependencies
       execSync(`npm i`, { cwd: newGeneratorPath, stdio: 'inherit' })
@@ -126,10 +131,10 @@ export default class Install implements ScriptBase {
         return json
       })
 
-      console.log(green(`${LOG_MODULE} ${templateName} has been converted to yoeman generator.`))
+      console.log(cyan(`${LOG_MODULE} Install successfully.`))
 
       return
     }
-    console.log(red(`${LOG_MODULE} ${templateName} download failed.`))
+    console.log(red(`${LOG_MODULE} ${projectPath} don't exist.`))
   }
 }

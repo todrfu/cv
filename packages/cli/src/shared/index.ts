@@ -97,7 +97,7 @@ export function getTemplateNameByUrl(url: string) {
  * @param url
  */
 export function getGitRepoName(url: string) {
-  return url.match(/\/([^/]+)\.git$/)?.[1] || ''
+  return url.match(/\/([^/]+)\.git(?:#.*)?$/)?.[1] || ''
 }
 
 /**

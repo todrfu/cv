@@ -11,11 +11,11 @@ import { NPM_REGISTRY, TEMPLATE_DIR } from 'src/const'
 import { getInstalledStatus, getInstalledGenerators } from 'src/shared/package'
 import { readJson } from 'src/shared/index'
 
-const { green, yellow, red } = chalk
+const { cyan, green, yellow, red } = chalk
 
 import Install from './install'
 
-const LOG_MODULE = '[create project]'
+const LOG_MODULE = green('[create project]')
 
 const yoemanEnv = createEnv()
 
@@ -83,7 +83,7 @@ export default class Create implements ScriptBase {
         stdio: 'inherit'
       })
 
-      console.log(green(`${LOG_MODULE} Dependencies installed successfully.`))
+      console.log(cyan(`${LOG_MODULE} Dependencies installed successfully.`))
     }
   }
   /**
@@ -96,7 +96,7 @@ export default class Create implements ScriptBase {
     if (tplPkg) {
       yoemanEnv.register(path.join(generatorsPath, `./${tplName}`), tplName)
       await yoemanEnv.run(tplName)
-      console.log(green(`${LOG_MODULE} Congratulations, the project has been initialized successfully.`))
+      console.log(cyan(`${LOG_MODULE} Congratulations, the project has been initialized successfully.`))
     }
   }
   /**
