@@ -1,5 +1,5 @@
-import { getInstalledStatus, getInstalledGenerators } from '../package'
-import { TEMPLATE_PREFIX } from '../../const'
+import { getInstalledStatus, getInstalledGenerators } from 'src/shared/package'
+import { TEMPLATE_PREFIX } from 'src/const'
 
 jest.mock('child_process', () => ({
   execSync: jest.fn(() => '1.0.0\n')

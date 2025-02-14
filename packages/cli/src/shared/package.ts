@@ -38,7 +38,9 @@ export function getInstalledStatus(pkgName: string, targetDir: string): number {
 export function getInstalledGenerators(targetDir: string): PlainObject {
   const dependencies = getInstalledPkgs(targetDir)
   Object.keys(dependencies).forEach((v) => {
-    if (!v.startsWith(TEMPLATE_PREFIX)) delete dependencies[v]
+    if (!v.startsWith(TEMPLATE_PREFIX)) {
+      Reflect.deleteProperty(dependencies, v)
+    }
   })
   return dependencies
 }

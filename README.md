@@ -4,11 +4,21 @@
 
 The global command for `cli` is: `cv`
 
-| CMD     | Description          | Note      |
-|---------|----------------------|-----------|
-| create  | Initialize a project | Alias: c  |
-| install | Install a template   | Alias: i  |
-| yo      | Initialize a Yeoman template |   |
+```bash
+➜  cv -h
+Usage: cv [options] [command]
+
+Options:
+  -v, --version        output the version number
+  -h, --help           display help for command
+
+Commands:
+  create|c             create a project
+  install|i <pkgName>  install a cv template
+  yo|y <projectName>   create cv template
+  update               update cv self
+  help [command]       display help for command
+```
 
 ## create
 
@@ -30,10 +40,10 @@ If the desired template is not available, you can choose to install [other templ
 
 Install other templates, supporting both `npm` packages and `git url` packages.
 
-The `npm` package for templates should have the prefix `@otdrfu/generator-`.
+The `npm` package for templates should have the prefix `cv-generator-`.
 
 ```bash
-cv install @otdrfu/generator-pc-xxx
+cv install cv-generator-pc-xxx
 ```
 
 If the project corresponding to the `git url` is not a `yeoman-generator` package as specified by this project, it will be forcibly converted to a `yeoman-generator` package after downloading.
@@ -53,9 +63,9 @@ When you need to add template options, you can customize the project template us
 ➜  cv yo test-yo
 ```
 
-A folder named `@otdrfu-generator-test-yo` will be created in the current directory, containing the code for creating project templates suitable for `cv`.
+A folder named `generator-test-yo` will be created in the current directory, containing the code for creating project templates suitable for `cv`.
 
-➜  cd @otdrfu-generator-test-yo
+➜  cd generator-test-yo
 
 ➜  tree -L 1
 
@@ -63,7 +73,7 @@ A folder named `@otdrfu-generator-test-yo` will be created in the current direct
 .
 ├── README.md
 ├── index.js
-├── package.json  # The package name must have the prefix @otdrfu/generator-
+├── package.json  # The package name must have the prefix cv-generator-
 ├── questions.js  # Yeoman script, can be adjusted as needed
 └── template      # Project template code should be placed in this directory
 ```

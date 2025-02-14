@@ -1,10 +1,10 @@
 {
-  "name": "@otdrfu/generator-exapmle",
+  "name": "cv-generator-exapmle",
   "version": "0.0.1",
   "description": "yeoman generator example",
   "main": "index.js",
   "author": "todrfu",
-  "repository": "https://xxxx",
+  "repository": "https://github.com/todrfu/cv-cli",
   "license": "MIT",
   "keywords": [],
   "dependencies": {

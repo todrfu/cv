@@ -2,27 +2,28 @@ import path from 'node:path'
 import fs from 'node:fs'
 import ora from 'ora'
 import chalk from 'chalk'
-import { CLI_NAME } from 'src/const'
-import ScriptBase from 'src/baseScript'
+import Base from './base'
+import { CLI_NAME } from '../const'
 
-const { green, red, cyan } = chalk
+const { red, cyan } = chalk
 
-const LOG_MODULE = green('[yeoman]')
+const LOG_MODULE = '[yeoman]'
 
-export default class Yo implements ScriptBase {
-  pkgName: string
-  dir: DirectoryInfo
+export default class Yo extends Base {
+  pkgName: string = ''
+  dir: DirectoryInfo | null = null
 
-  constructor({ dir }: { pkgName: string; dir: DirectoryInfo }) {
+  constructor() {
+    super()
+  }
+
+  start(dir: DirectoryInfo, args: Record<string, string>) {
     this.dir = dir
-    const name = process.argv[3]
-    if (!name) {
+    if (!args.projectName) {
       console.log(red(`${LOG_MODULE} Please specify the template name，eg: ${CLI_NAME} yo xxx `))
       process.exit(1)
     }
-    this.pkgName = name
-  }
-  start() {
+    this.pkgName = args.projectName
     this.installTemplate()
   }
   /**
@@ -45,7 +46,9 @@ export default class Yo implements ScriptBase {
 
       loadSpinner.succeed()
 
-      console.log(cyan(`${LOG_MODULE} Yeoman template has been initialized successfully`))
+      console.log(cyan(`\n${LOG_MODULE} Yeoman template has been initialized successfully`))
+
+      await this.logCV()
     } catch (err) {
       loadSpinner.fail()
       console.log(red(`${LOG_MODULE} Initialization failed. ${err}`))

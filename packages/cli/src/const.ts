@@ -1,4 +1,3 @@
-import path from 'node:path'
 import { home } from 'osenv'
 
 /**
@@ -44,7 +43,7 @@ export const CACHE_TEMPLATE_PACKAGE_NAME = `@${CLI_NAME}/cli-workspace`
 /**
  * prefix of template package
  */
-export const TEMPLATE_PREFIX = `@otdrfu/generator`
+export const TEMPLATE_PREFIX = `cv-generator`
 
 /**
  * git url of template to install
@@ -55,8 +54,3 @@ export const TEAMPLATE_EXAMPLE_URL = 'https://git.xxx.com/xxx.git'
  * default templates
  */
 export const DEFAULT_TEMPLATES: Template[] = []
-
-/**
- * template dir of user client
- */
-export const TEMPLATE_DIR = path.resolve(HOMEDIR, CACHE_TEMPLATE_FOLDER_NAME)

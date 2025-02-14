@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
+import figlet from 'figlet'
 
 /**
  * copy file
@@ -101,26 +102,6 @@ export function getGitRepoName(url: string) {
 }
 
 /**
- * read json file
- * @param filePath
- */
-export function readJson(filePath: string) {
-  const data = fs.readFileSync(filePath, 'utf8')
-  return JSON.parse(data)
-}
-
-/**
- * update json file data
- * @param filePath
- * @param updateJSON
- */
-export function updateJson(filePath: string, updateJSON: (json: Record<string, any>) => Record<string, any>) {
-  const jsonData = readJson(filePath)
-  if (!jsonData) return
-  fs.writeFileSync(filePath, JSON.stringify(updateJSON(jsonData), null, 2), 'utf8')
-}
-
-/**
  * get remote templates
  * @param pkgName
  */
@@ -133,4 +114,20 @@ export function getRemoteTemplates(pkgName: string): Array<{ name: string; descr
     console.log('get remote templates failed')
   }
   return packages
+}
+
+/**
+ * figlet with promise
+ * @param text
+ */
+export function printFiglet(text: string) {
+  return new Promise((resolve, reject) => {
+    figlet(text, (err, data) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(data)
+      }
+    })
+  })
 }

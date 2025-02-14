@@ -4,8 +4,8 @@ import {
   getGitRepoName,
   toValidPackageName,
   isValidPackageName,
-  readJson
-} from '../index'
+} from 'src/shared/index'
+import json from 'src/shared/json'
 
 describe('shared/index', () => {
   describe('isUrl', () => {
@@ -42,7 +42,7 @@ describe('shared/index', () => {
       const mockJson = { test: 'value' }
       jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify(mockJson))
 
-      expect(readJson('mock/path.json')).toEqual(mockJson)
+      expect(json.read('mock/path.json')).toEqual(mockJson)
     })
   })
 })

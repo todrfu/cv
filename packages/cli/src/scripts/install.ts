@@ -1,45 +1,34 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { execSync } from 'node:child_process'
+import { execSync, exec } from 'node:child_process'
 import chalk from 'chalk'
+import inquirer from 'inquirer'
 
-import { NPM_REGISTRY, TEMPLATE_PREFIX, TEAMPLATE_EXAMPLE_URL, CLI_NAME } from 'src/const'
-import ScriptBase from 'src/baseScript'
-import { isUrl, getGitRepoName, readJson, updateJson } from 'src/shared/index'
-
+import { NPM_REGISTRY, TEMPLATE_PREFIX } from '../const'
+import json from '../shared/json'
+import { isUrl, getGitRepoName, isValidPackageName } from '../shared/index'
+import Base from './base'
 const { green, yellow, cyan, red } = chalk
 
-const LOG_MODULE = green('[install template]')
-
-const installTipMessage = `
-Please specify the git url or package name of npm to install.
-
-eg:
-
-${green(`${CLI_NAME} install ${TEAMPLATE_EXAMPLE_URL}\n${CLI_NAME} install ${TEMPLATE_PREFIX}-xxx`)}
-`
-
-export default class Install implements ScriptBase {
-  pkgName: string
-  dir: DirectoryInfo
-
-  constructor({ pkgName, dir }: { pkgName: string; dir: DirectoryInfo }) {
-    this.dir = dir
-    this.pkgName = pkgName || process.argv[3]
+const LOG_MODULE = '[install]'
+export default class Install extends Base {
+  pkgName: string = ''
+  dir: DirectoryInfo = {
+    home: '',
+    tpl: '',
+    cwd: '',
   }
-  start() {
-    if (!this.pkgName) {
-      console.log(yellow(installTipMessage))
+
+  constructor() {
+    super()
+  }
+  async start(dir: DirectoryInfo, args: Record<string, string>) {
+    this.dir = dir
+    if (!args.pkgName) {
       process.exit(1)
     }
 
-    // const status = getInstalledStatus(this.pkgName, this.dir.tpl)
-    // if (status === 2) {
-    //   console.log(cyan('The template has been installed'))
-    //   return
-    // }
-
-    this.installGenerator(this.pkgName)
+    await this.installGenerator(args.pkgName)
   }
   /**
    * install generator
@@ -51,11 +40,29 @@ export default class Install implements ScriptBase {
       const exist = fs.existsSync(path.join(this.dir.tpl, `generator-${templateName}`))
       if (exist) {
         console.log(yellow(`${LOG_MODULE} ${templateName} already exists.`))
-        return
+        // ask user to delete and install again
+
+        const { reinstall } = await inquirer.prompt<{ reinstall: boolean }>({
+          type: 'confirm',
+          name: 'reinstall',
+          message: 'Do you want to reinstall?',
+          default: false,
+        })
+
+        if (!reinstall) {
+          process.exit(1)
+        }
+
+        fs.rmSync(path.join(this.dir.tpl, `generator-${templateName}`), { recursive: true, force: true })
       }
-      this.installByGit(target, templateName)
+      await this.installByGit(target, templateName)
       this.checkIsYoemanGenerator(templateName)
     } else {
+      if (!isValidPackageName(target)) {
+        console.log(red(`${LOG_MODULE} ${target} is not a valid package name`))
+        process.exit(1)
+      }
+
       this.installByNpm(target)
     }
   }
@@ -63,16 +70,26 @@ export default class Install implements ScriptBase {
    * install generator by git clone
    * @param url git url
    */
-  installByGit(url: string, templateName: string) {
-    console.log(green(`${LOG_MODULE} Start to clone ${templateName}`))
-    if (!url) {
-      console.log(red(`${LOG_MODULE} Url is required`))
-      process.exit(1)
-    }
-    const [repository, branch] = url.split('#')
-    execSync(`git clone ${repository} ${branch ? `--branch ${branch}` : ''}`, {
-      cwd: this.dir.tpl,
-      stdio: 'inherit',
+  async installByGit(url: string, templateName: string) {
+    return new Promise((resolve, reject) => {
+      console.log(green(`${LOG_MODULE} Start to clone ${templateName}`))
+      if (!url) {
+        console.log(red(`${LOG_MODULE} Url is required`))
+        process.exit(1)
+      }
+      const [repository, branch] = url.split('#')
+      exec(
+        `git clone ${repository} ${branch ? `--branch ${branch}` : ''}`,
+        {
+          cwd: this.dir.tpl,
+        },
+        (error, stdout, stderr) => {
+          if (error) {
+            return reject(`Error cloning repository: ${stderr}`);
+          }
+          resolve(stdout);
+        },
+      )
     })
   }
   /**
@@ -92,9 +109,13 @@ export default class Install implements ScriptBase {
     // download project path
     const projectPath = path.join(this.dir.tpl, templateName)
     // get name from package.json
-    const pkgJson = readJson(path.join(projectPath, 'package.json'))
-    const isGenerator = pkgJson.name.startsWith(TEMPLATE_PREFIX)
-    if (isGenerator) return
+    const pkgJson = json.read(path.join(projectPath, 'package.json'))
+    const isGenerator = pkgJson.name.startsWith('@iface/generator-uniapp')
+    if (isGenerator) {
+      console.log(cyan(`${LOG_MODULE} Install successfully.`))
+      await this.logCV()
+      return
+    }
 
     const exist = fs.existsSync(projectPath)
     if (exist) {
@@ -112,26 +133,28 @@ export default class Install implements ScriptBase {
       fs.rmSync(projectPath, { recursive: true, force: true })
 
       // update generator package.json
-      updateJson(path.join(newGeneratorPath, 'package.json'), (json) => {
+      json.update(path.join(newGeneratorPath, 'package.json'), (json) => {
         json.name = `${TEMPLATE_PREFIX}-${templateName}`
         json.description = templateName
         return json
       })
 
-      console.log(yellow(`${LOG_MODULE} Start to install dependencies`))
+      console.log(green(`${LOG_MODULE} Start to install dependencies`))
 
       // install yeoman-generator dependencies
       execSync(`npm i`, { cwd: newGeneratorPath, stdio: 'inherit' })
 
       // update template package.json
-      updateJson(path.join(newGeneratorPath, 'template/package.json'), (json) => {
+      json.update(path.join(newGeneratorPath, 'template/package.json'), (json) => {
         json.name = '<%= appName %>'
         json.author = '<%= author %>'
         json.description = '<%= description %>'
         return json
       })
 
-      console.log(cyan(`${LOG_MODULE} Install successfully.`))
+      console.log(cyan(`\n${LOG_MODULE} Congratulations, the template has been installed successfully.`))
+
+      await this.logCV()
 
       return
     }

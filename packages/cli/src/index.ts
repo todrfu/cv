@@ -1,59 +1,30 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { execSync } from 'node:child_process'
-import chalk from 'chalk'
-import semver from 'semver'
 import minimist from 'minimist'
+import chalk from 'chalk'
 import { mkdirp } from 'mkdirp'
+import { program } from 'commander'
 import Install from './scripts/install'
 
-import pkg from '../package.json'
 import {
   DEFAULT_TEMPLATES,
-  CLI_NAME,
-  COMMANDS_FOLDER,
   HOMEDIR,
-  TEMPLATE_DIR,
-  NPM_REGISTRY,
   CACHE_TEMPLATE_PACKAGE_NAME,
+  CACHE_TEMPLATE_FOLDER_NAME,
   INIT_FLAG_FILE,
 } from 'src/const'
 
-const { cyan, yellow, green } = chalk
-
-const helpMessage = `\
-Usage: cv [COMMAND] [OPTION]
-
-Create a new cv project or template.
-
-Commands:
-  create       create a project by choosed template
-
-Available commands:
-
-${cyan('create      alias c, create a project')}
-${cyan('install     alais i, install project template to local')}
-${cyan('yo          create a project template')}
-`
-
-const noCmdMessage = (supportedCmds: string) => `
-Supported Commands:
-
-${cyan(supportedCmds)}
-`
-
-const upgradeMesssage = (ltsVersion: string) => `
-${yellow(`${CLI_NAME} is old(v${pkg.version}), you can execute "npm i -g ${pkg.name}@latest" to upgrade(${ltsVersion}`)}
-`
-
+const { green } = chalk
 class CLI {
   argv: Record<string, string[]> = {}
   dir: DirectoryInfo
+  static helpMessage: () => string;
+
   constructor() {
     this.argv = minimist(process.argv)
     this.dir = {
       home: HOMEDIR,
-      tpl: TEMPLATE_DIR,
+      tpl: path.resolve(HOMEDIR, CACHE_TEMPLATE_FOLDER_NAME),
       cwd: process.cwd(),
     }
 
@@ -61,9 +32,11 @@ class CLI {
   }
   async start() {
     await this.initWhenFirstRun()
-    // this.isOutdatedCli()
-    this.execCmd()
+    this.registreCommands()
   }
+  /**
+   * initialize when first run
+   */
   async initWhenFirstRun() {
     // check is initialized
     const initFlagFile = path.resolve(this.dir.home, INIT_FLAG_FILE)
@@ -71,57 +44,21 @@ class CLI {
       await this.prepareTemplateDir(this.dir)
       await this.copyGenerators()
       fs.writeFileSync(initFlagFile, new Date().toISOString())
+      await this.installDefaultTpls()
     }
-
-    await this.installDefaultTpls()
   }
   /**
-   * is help command
+   * register commands
    */
-  isHelpCommand() {
-    return this.argv['help'] || this.argv['h']
-  }
-  /**
-   * is check version command
-   */
-  isCheckVersionCommand() {
-    return this.argv['version'] || this.argv['v']
-  }
-  /**
-   * execute command
-   */
-  async execCmd() {
-    if (this.isHelpCommand()) {
-      console.log(yellow(helpMessage))
-      process.exit(0)
+  registreCommands() {
+    const commandsDir = path.resolve(__dirname, 'commands')
+    const commands = fs.readdirSync(commandsDir)
+    for (const command of commands) {
+      const commandFile = require(path.resolve(commandsDir, command))
+      const cmdIns = new commandFile.default(this.dir)
+      cmdIns.register()
     }
-    if (this.isCheckVersionCommand()) {
-      console.log(green(`v${pkg.version}`))
-      process.exit(0)
-    }
-    const command = this.argv['_'][2]
-    const supportedCmds = fs.readdirSync(path.resolve(__dirname, COMMANDS_FOLDER)).map((item) => item.split('.')[0])
-    if (!supportedCmds.includes(command)) {
-      console.log(noCmdMessage(supportedCmds.join('\n')))
-      process.exit(1)
-    }
-
-    // resolve command file
-    const CmdClass = require(path.resolve(__dirname, COMMANDS_FOLDER, command))
-
-    const commander = new CmdClass.default({ dir: this.dir, args: this.argv })
-    commander.start()
-  }
-  /**
-   * check cli for outdated
-   */
-  isOutdatedCli() {
-    const ltsVersion = execSync(`npm view ${pkg.name} version --registry=${NPM_REGISTRY}`) + ''
-    if (semver.lt(pkg.version, ltsVersion)) {
-      console.log(upgradeMesssage(ltsVersion))
-      return true
-    }
-    return false
+    program.parse(process.argv)
   }
   /**
    * prepare template dir
@@ -150,11 +87,14 @@ class CLI {
    * Install the default template
    */
   async installDefaultTpls() {
-    const installIns = new Install({ dir: this.dir, pkgName: '' })
+    const installIns = new Install()
+    if (DEFAULT_TEMPLATES.length > 0) {
+      console.log(green('[cv init] first use, install the default template...'))
+    }
     for (const tpl of DEFAULT_TEMPLATES) {
       // if the template is installed, skip
-      if (fs.existsSync(path.resolve(this.dir.tpl, `generator-${tpl.name}`))) continue
-      await installIns.installGenerator(tpl.url)
+        if (fs.existsSync(path.resolve(this.dir.tpl, `generator-${tpl.name}`))) continue
+        await installIns.start(this.dir, { pkgName: tpl.url })
     }
   }
   /**

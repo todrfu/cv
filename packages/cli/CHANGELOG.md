@@ -1,5 +1,11 @@
 # @otdrfu/cv
 
+## 0.1.4
+
+### Patch Changes
+
+- [U] migrate from custom command parsing to Commander
+
 ## 0.1.3
 
 ### Patch Changes

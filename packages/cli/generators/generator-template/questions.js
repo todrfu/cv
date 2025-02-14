@@ -3,8 +3,11 @@ const path = require('path')
 
 function formatVal(val) {
   return val
-    .replace(/[\u0000-\u0019]/g, '')
-    .replace(/^(\s|\xA0)+|(\s|\xA0)+$/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/^[._]/, '')
+    .replace(/[^a-z\d\-~]+/g, '-')
 }
 
 exports.questions = [
@@ -12,7 +15,7 @@ exports.questions = [
     type: 'input',
     message: 'Set project name',
     name: 'appName',
-    default: path.basename(process.cwd()),
+    default: 'generator-template',
     filter: (val) => formatVal(val),
   },
   {
@@ -32,12 +35,12 @@ exports.questions = [
     type: 'input',
     message: 'Set project description',
     name: 'description',
-    default: '',
+    default: 'generator template for cv',
   },
   {
     type: 'confirm',
     message: 'Automatically install dependencies after initialization?',
     name: 'installImmediately',
-    default: false,
+    default: true,
   },
 ]

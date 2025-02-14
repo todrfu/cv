@@ -1,10 +1,14 @@
 const fs = require('fs')
 const path = require('path')
 const pkg = require('./package.json')
+
 function formatVal(val) {
   return val
-    .replace(/[\u0000-\u0019]/g, '')
-    .replace(/^(\s|\xA0)+|(\s|\xA0)+$/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/^[._]/, '')
+    .replace(/[^a-z\d\-~]+/g, '-')
 }
 
 exports.questions = [
@@ -32,12 +36,12 @@ exports.questions = [
     type: 'input',
     message: 'Set project description',
     name: 'description',
-    default: '',
+    default: pkg.name,
   },
   {
     type: 'confirm',
     message: 'Automatically install dependencies after initialization?',
     name: 'installImmediately',
-    default: false,
+    default: true,
   },
 ]
