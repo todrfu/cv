@@ -14,3 +14,7 @@ base64 < key.pem | tr -d '\n' # EXTENSION_PRIVATE_KEY
 ```bash
 EXTENSION_PRIVATE_KEY: ${{ secrets.EXTENSION_PRIVATE_KEY }}
 ```
+
+## download crx
+
+[Download CRX file](CRX_PLACEHOLDER_URL)
